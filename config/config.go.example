@@ -1,0 +1,4 @@
+package config
+
+var JSONWebTokenPassword = "my_secret_key"
+var CORSDomain = "http://frontend.domain"

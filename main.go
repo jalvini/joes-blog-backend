@@ -16,6 +16,7 @@ var c = cors.New(cors.Options{
 })
 
 func main() {
+
 	r := router.Routes()
 
 	log.Fatal(http.ListenAndServe(":8001", c.Handler(r)))

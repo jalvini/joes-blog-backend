@@ -2,10 +2,10 @@ package models
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"joes-blog-backend/config"
+	"os"
 )
 
-var JwtKey = []byte(config.JSONWebTokenPassword)
+var JwtKey = []byte(os.Getenv("JSONWebTokenPassword"))
 
 // Create a struct to read the username and password from the request body
 type Credentials struct {

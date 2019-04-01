@@ -26,7 +26,15 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		if t.Username == helpers.Users["username"] && t.Password == helpers.Users["password"] {
+		var password = "Make00"
+		hash := helpers.HashPassword(password)
+
+		getUser := helpers.ReadUser("jalvini")
+
+		checkHash := helpers.ComparePassword(hash, t.Password)
+
+		if t.Username == getUser.Username && checkHash == true {
+			fmt.Println(t.Username)
 			// Declare the expiration time of the token
 			// here, we have kept it as 5 minutes
 			expirationTime := time.Now().Add(48 * time.Hour)
@@ -34,7 +42,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			claims := &models.Claims{
 				Username: t.Username,
 				StandardClaims: jwt.StandardClaims{
-					// In JWT, the expiry time is expressed as unix milliseconds
 					ExpiresAt: expirationTime.Unix(),
 				},
 			}
@@ -45,7 +52,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			// Create the JWT string
 			tokenString, err := token.SignedString(models.JwtKey)
 			if err != nil {
-				// If there is an error in creating the JWT return an internal server error
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -54,9 +60,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			w.Write(tokenByte)
 		} else {
 
-			//json.NewEncoder(w).Encode(Exception{Message: "'Username or password is incorrect"})
-
-			fmt.Println("Joe")
 			in := `{ error: { message: 'Username or password is incorrect' } }`
 
 			rawIn := json.RawMessage(in)
@@ -67,8 +70,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			}
 
 			w.Write(bytes)
-			fmt.Println(string(bytes))
-
 		}
 	}
 }

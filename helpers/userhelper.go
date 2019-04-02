@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"log"
 	"os"
 )
 
@@ -27,6 +28,7 @@ func dbConn() (db *sql.DB) {
 	dbUser := os.Getenv("MySQLUserName")
 	dbPass := os.Getenv("MySQLPassword")
 	dbName := os.Getenv("DBName")
+
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
 		panic(err.Error())
@@ -34,18 +36,31 @@ func dbConn() (db *sql.DB) {
 	return db
 }
 
-func CreateUser() {
+func CreateUser(username, hash, email, first_name, last_name, role, pic string) {
+	db := dbConn()
+
+	insertUser := `INSERT INTO users (username, password, email, first_name, last_name, role, pic) VALUES (?,?,?,?,?,?,?)`
+	prepare, err := db.Prepare(insertUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = prepare.Exec(username, hash, email, first_name, last_name, role, pic)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer prepare.Close()
 }
 
 func ReadUser(userName string) User {
 	db := dbConn()
 
 	user := User{}
-
 	selectUser := `SELECT username, email, first_name, last_name, role, pic FROM users WHERE username=?`
 	row := db.QueryRow(selectUser, userName)
-	err := row.Scan(&user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Role, &user.Pic)
 
+	err := row.Scan(&user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Role, &user.Pic)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println("Zero rows found")
@@ -57,12 +72,38 @@ func ReadUser(userName string) User {
 	return user
 }
 
-func UpdateUser() {
+func UpdateUser(hash, email, first_name, last_name, role, pic, username string) {
+	db := dbConn()
 
+	updateUser := `UPDATE users SET password= ?, email= ?, first_name= ?, last_name=?, role= ?, pic= ? WHERE username= ?`
+	prepare, err := db.Prepare(updateUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = prepare.Exec(hash, email, first_name, last_name, role, pic, username)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer prepare.Close()
 }
 
-func DeleteUser() {
+func DeleteUser(username string) {
+	db := dbConn()
 
+	deleteUser := `DELETE FROM users WHERE username=?`
+	prepare, err := db.Prepare(deleteUser)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	_, err = prepare.Exec(username)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer prepare.Close()
 }
 
 func ShowUsers() []Users {

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
-	"joes-blog-backend/helpers"
 	"joes-blog-backend/router"
 	"log"
 	"net/http"
@@ -23,7 +22,6 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	helpers.ReadUser("jalvini")
 	r := router.Routes()
 
 	log.Fatal(http.ListenAndServe(":8001", c.Handler(r)))
